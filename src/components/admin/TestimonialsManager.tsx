@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Upload, Trash2, Plus, Save, X, Eye, EyeOff } from 'lucide-react';
 
 interface Testimonial {

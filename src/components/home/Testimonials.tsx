@@ -1,6 +1,6 @@
 import { Quote, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const professionalTestimonials = [
