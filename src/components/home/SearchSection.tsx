@@ -25,7 +25,7 @@ interface LocationResult {
 }
 
 export function SearchSection() {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const [location, setLocation] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<LocationResult[]>([]);
