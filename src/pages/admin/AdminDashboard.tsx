@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { LogOut, Settings, Image as ImageIcon, MessageSquare, FileText, Globe, ChevronDown } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '../../integrations/supabase/client';
 import { VectorIconsManager } from '../../components/admin/VectorIconsManager';
 import { TestimonialsManager } from '../../components/admin/TestimonialsManager';
 import { ContractMirrorsManager } from '../../components/admin/ContractMirrorsManager';

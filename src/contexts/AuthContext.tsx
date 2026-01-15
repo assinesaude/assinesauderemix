@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
+import { supabase } from '../integrations/supabase/client';
 
 type UserType = 'admin' | 'professional' | 'patient';
 
@@ -51,23 +51,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session: currentSession } }: { data: { session: Session | null } }) => {
       (async () => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        if (currentSession?.user) {
+          await fetchProfile(currentSession.user.id);
         }
         setLoading(false);
       })();
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, currentSession: Session | null) => {
       (async () => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        if (currentSession?.user) {
+          await fetchProfile(currentSession.user.id);
         } else {
           setProfile(null);
         }

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '../../integrations/supabase/client';
 import { FileText, Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 
 interface Country {
