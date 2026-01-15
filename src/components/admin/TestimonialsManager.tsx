@@ -111,7 +111,7 @@ export function TestimonialsManager({ selectedCountry }: Props) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile } = await supabase
         .from('profiles')
         .select('id')
         .eq('full_name', newTestimonial.full_name)

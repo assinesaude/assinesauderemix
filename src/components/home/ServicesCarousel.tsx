@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const services = [
   { image: '/Quiroprata.png', title: 'Quiroprata' },

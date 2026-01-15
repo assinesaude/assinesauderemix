@@ -24,7 +24,7 @@ interface Props {
   selectedCountry: Country | null;
 }
 
-export function VectorIconsManager({ selectedCountry }: Props) {
+export function VectorIconsManager({ selectedCountry: _selectedCountry }: Props) {
   const [icons, setIcons] = useState<VectorIcon[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
