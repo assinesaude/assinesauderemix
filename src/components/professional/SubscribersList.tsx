@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Mail, Phone, Calendar } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '../../integrations/supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface Subscriber {
@@ -50,7 +50,7 @@ export function SubscribersList() {
         return;
       }
 
-      const planIds = plans.map(p => p.id);
+      const planIds = plans.map((p: { id: string }) => p.id);
 
       const { data, error } = await supabase
         .from('subscriptions')

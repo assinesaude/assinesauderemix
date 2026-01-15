@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Mic, MicOff, Search, AlertCircle, Lock, Pill } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '../../integrations/supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 import { BularioSearch } from './BularioSearch';
 
@@ -43,8 +43,8 @@ export function TervisAI() {
         .eq('date', today);
 
       if (data) {
-        setTextSearchCount(data.filter(d => d.search_type === 'text').length);
-        setVoiceSearchCount(data.filter(d => d.search_type === 'voice').length);
+        setTextSearchCount(data.filter((d: { search_type: string }) => d.search_type === 'text').length);
+        setVoiceSearchCount(data.filter((d: { search_type: string }) => d.search_type === 'voice').length);
       }
     } else {
       const { data } = await supabase
@@ -54,8 +54,8 @@ export function TervisAI() {
         .eq('date', today);
 
       if (data) {
-        setTextSearchCount(data.filter(d => d.search_type === 'text').length);
-        setVoiceSearchCount(data.filter(d => d.search_type === 'voice').length);
+        setTextSearchCount(data.filter((d: { search_type: string }) => d.search_type === 'text').length);
+        setVoiceSearchCount(data.filter((d: { search_type: string }) => d.search_type === 'voice').length);
       }
     }
   };
