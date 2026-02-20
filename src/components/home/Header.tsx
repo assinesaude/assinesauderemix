@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { User, ChevronDown, Globe } from 'lucide-react';
+import { User, ChevronDown, Globe, Heart } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -24,11 +24,12 @@ export function Header() {
         <div className="flex items-center justify-between">
           <div className="flex-1 flex justify-center">
             <Link to="/" className="block transition-transform hover:scale-105 duration-300">
-              <img
-                src="/assinesaude.png"
-                alt="AssineSaúde"
-                className="h-32 w-auto drop-shadow-lg"
-              />
+              <div className="flex items-center gap-3">
+                <Heart className="w-10 h-10 text-brand-green-500" />
+                <span className="text-3xl font-serif font-bold text-slate-800">
+                  Assine<span className="text-brand-green-500">Saúde</span>
+                </span>
+              </div>
             </Link>
           </div>
 
