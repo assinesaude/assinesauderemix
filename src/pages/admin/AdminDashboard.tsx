@@ -60,7 +60,7 @@ export function AdminDashboard() {
     navigate('/');
   };
 
-  if (profile?.user_type !== 'admin') {
+  if (profile?.role !== 'admin') {
     navigate('/dashboard');
     return null;
   }

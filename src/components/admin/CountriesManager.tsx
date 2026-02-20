@@ -40,7 +40,7 @@ export function CountriesManager({ onCountriesChange }: Props) {
         .order('name');
 
       if (error) throw error;
-      setCountries(data || []);
+      setCountries((data as unknown as Country[]) || []);
     } catch (error) {
       console.error('Error fetching countries:', error);
     } finally {
@@ -60,7 +60,6 @@ export function CountriesManager({ onCountriesChange }: Props) {
             code: formData.code.toUpperCase(),
             language_code: formData.language_code,
             domain: formData.domain || null,
-            updated_at: new Date().toISOString()
           })
           .eq('id', editingCountryId);
 
@@ -121,23 +120,13 @@ export function CountriesManager({ onCountriesChange }: Props) {
   };
 
   const resetForm = () => {
-    setFormData({
-      name: '',
-      code: '',
-      language_code: 'pt',
-      domain: ''
-    });
+    setFormData({ name: '', code: '', language_code: 'pt', domain: '' });
     setIsAddingCountry(false);
     setEditingCountryId(null);
   };
 
   const getLanguageName = (code: string) => {
-    const languages: { [key: string]: string } = {
-      pt: 'Português',
-      it: 'Italiano',
-      es: 'Español',
-      en: 'English'
-    };
+    const languages: Record<string, string> = { pt: 'Português', it: 'Italiano', es: 'Español', en: 'English' };
     return languages[code] || code;
   };
 
@@ -149,10 +138,7 @@ export function CountriesManager({ onCountriesChange }: Props) {
           <h2 className="text-xl font-semibold text-slate-900">Gerenciar Países</h2>
         </div>
         {!isAddingCountry && (
-          <button
-            onClick={() => setIsAddingCountry(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-brand-green-600 text-white rounded-lg hover:bg-brand-green-700 transition-colors"
-          >
+          <button onClick={() => setIsAddingCountry(true)} className="flex items-center gap-2 px-4 py-2 bg-brand-green-600 text-white rounded-lg hover:bg-brand-green-700 transition-colors">
             <Plus className="w-4 h-4" />
             Adicionar País
           </button>
@@ -163,81 +149,34 @@ export function CountriesManager({ onCountriesChange }: Props) {
         <form onSubmit={handleSubmit} className="mb-6 p-4 bg-slate-50 rounded-lg">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Nome do País
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-green-500 focus:border-transparent"
-                placeholder="Ex: Brasil"
-                required
-              />
+              <label className="block text-sm font-medium text-slate-700 mb-2">Nome do País</label>
+              <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-green-500 focus:border-transparent" placeholder="Ex: Brasil" required />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Código ISO (2 letras)
-              </label>
-              <input
-                type="text"
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-green-500 focus:border-transparent"
-                placeholder="Ex: BR"
-                maxLength={2}
-                required
-              />
+              <label className="block text-sm font-medium text-slate-700 mb-2">Código ISO (2 letras)</label>
+              <input type="text" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-green-500 focus:border-transparent" placeholder="Ex: BR" maxLength={2} required />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Idioma
-              </label>
-              <select
-                value={formData.language_code}
-                onChange={(e) => setFormData({ ...formData, language_code: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-green-500 focus:border-transparent"
-                required
-              >
+              <label className="block text-sm font-medium text-slate-700 mb-2">Idioma</label>
+              <select value={formData.language_code} onChange={(e) => setFormData({ ...formData, language_code: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-green-500 focus:border-transparent" required>
                 <option value="pt">Português</option>
                 <option value="it">Italiano</option>
                 <option value="es">Español</option>
                 <option value="en">English</option>
               </select>
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Domínio do Site
-              </label>
-              <input
-                type="text"
-                value={formData.domain}
-                onChange={(e) => setFormData({ ...formData, domain: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-green-500 focus:border-transparent"
-                placeholder="Ex: medlyou.com"
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Domínio sem http:// ou www
-              </p>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Domínio do Site</label>
+              <input type="text" value={formData.domain} onChange={(e) => setFormData({ ...formData, domain: e.target.value })} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-green-500 focus:border-transparent" placeholder="Ex: medlyou.com" />
+              <p className="text-xs text-slate-500 mt-1">Domínio sem http:// ou www</p>
             </div>
           </div>
-
           <div className="flex gap-2">
-            <button
-              type="submit"
-              className="flex items-center gap-2 px-4 py-2 bg-brand-green-600 text-white rounded-lg hover:bg-brand-green-700 transition-colors"
-            >
+            <button type="submit" className="flex items-center gap-2 px-4 py-2 bg-brand-green-600 text-white rounded-lg hover:bg-brand-green-700 transition-colors">
               <Save className="w-4 h-4" />
               {editingCountryId ? 'Atualizar' : 'Salvar'}
             </button>
-            <button
-              type="button"
-              onClick={resetForm}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
-            >
+            <button type="button" onClick={resetForm} className="flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors">
               <X className="w-4 h-4" />
               Cancelar
             </button>
@@ -248,9 +187,7 @@ export function CountriesManager({ onCountriesChange }: Props) {
       {loading ? (
         <div className="text-center py-8 text-slate-500">Carregando...</div>
       ) : countries.length === 0 ? (
-        <div className="text-center py-8 text-slate-500">
-          Nenhum país cadastrado
-        </div>
+        <div className="text-center py-8 text-slate-500">Nenhum país cadastrado</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -267,42 +204,19 @@ export function CountriesManager({ onCountriesChange }: Props) {
               {countries.map((country) => (
                 <tr key={country.id} className="border-b border-slate-100 hover:bg-slate-50">
                   <td className="py-3 px-4 text-sm text-slate-900">{country.name}</td>
-                  <td className="py-3 px-4 text-sm text-slate-600">
-                    <span className="px-2 py-1 bg-slate-100 rounded font-mono">
-                      {country.code}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-sm text-slate-600">
-                    {getLanguageName(country.language_code)}
-                  </td>
+                  <td className="py-3 px-4 text-sm text-slate-600"><span className="px-2 py-1 bg-slate-100 rounded font-mono">{country.code}</span></td>
+                  <td className="py-3 px-4 text-sm text-slate-600">{getLanguageName(country.language_code)}</td>
                   <td className="py-3 px-4 text-sm text-slate-600">
                     {country.domain ? (
-                      <a
-                        href={`https://${country.domain}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-brand-green-600 hover:underline"
-                      >
-                        {country.domain}
-                      </a>
+                      <a href={`https://${country.domain}`} target="_blank" rel="noopener noreferrer" className="text-brand-green-600 hover:underline">{country.domain}</a>
                     ) : (
                       <span className="text-slate-400 italic">Não definido</span>
                     )}
                   </td>
                   <td className="py-3 px-4 text-right">
                     <div className="flex gap-2 justify-end">
-                      <button
-                        onClick={() => handleEdit(country)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(country.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <button onClick={() => handleEdit(country)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><Edit2 className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(country.id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>

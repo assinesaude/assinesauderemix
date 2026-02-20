@@ -14,7 +14,7 @@ export function ProfessionalDashboard() {
     navigate('/');
   };
 
-  if (profile?.user_type !== 'professional') {
+  if (profile?.role !== 'professional') {
     navigate('/dashboard');
     return null;
   }
@@ -33,7 +33,7 @@ export function ProfessionalDashboard() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-gradient-to-br from-brand-purple-600 to-brand-green-600 rounded-xl flex items-center justify-center text-white font-bold">
-                {profile.full_name.charAt(0).toUpperCase()}
+                {(profile.full_name || 'P').charAt(0).toUpperCase()}
               </div>
               <div>
                 <h1 className="text-2xl font-serif font-bold text-slate-800">Meus Planos</h1>

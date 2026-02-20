@@ -6,7 +6,7 @@ interface VectorIcon {
   id: string;
   image_url: string;
   caption: string;
-  specialty: string;
+  specialty: string | null;
   order_position: number;
   is_active: boolean;
   created_at: string;
@@ -171,20 +171,12 @@ export function VectorIconsManager({ selectedCountry: _selectedCountry }: Props)
           <h3 className="text-lg font-semibold text-slate-800 mb-4">Novo Ícone</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Imagem do Ícone *
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Imagem do Ícone *</label>
               <div className="flex items-center gap-4">
                 <label className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg cursor-pointer transition-colors">
                   <Upload className="w-5 h-5" />
                   {uploading ? 'Enviando...' : 'Escolher Imagem'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    disabled={uploading}
-                  />
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
                 </label>
                 {newIcon.image_url && (
                   <img src={newIcon.image_url} alt="Preview" className="w-8 h-8 object-contain" />
@@ -193,9 +185,7 @@ export function VectorIconsManager({ selectedCountry: _selectedCountry }: Props)
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Nome da Profissão *
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Nome da Profissão *</label>
               <input
                 type="text"
                 value={newIcon.caption}
@@ -206,9 +196,7 @@ export function VectorIconsManager({ selectedCountry: _selectedCountry }: Props)
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Especialidade
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Especialidade</label>
               <input
                 type="text"
                 value={newIcon.specialty}
@@ -219,9 +207,7 @@ export function VectorIconsManager({ selectedCountry: _selectedCountry }: Props)
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Ordem de Exibição
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Ordem de Exibição</label>
               <input
                 type="number"
                 value={newIcon.order_position}

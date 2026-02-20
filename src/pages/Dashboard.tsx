@@ -16,9 +16,9 @@ export function Dashboard() {
     }
 
     if (!loading && profile) {
-      if (profile.user_type === 'admin') {
+      if (profile.role === 'admin') {
         navigate('/admin');
-      } else if (profile.user_type === 'professional') {
+      } else if (profile.role === 'professional') {
         navigate('/professional');
       }
     }
@@ -54,7 +54,7 @@ export function Dashboard() {
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="font-semibold text-slate-800">{profile.full_name}</p>
-              <p className="text-sm text-slate-600 capitalize">{profile.user_type}</p>
+              <p className="text-sm text-slate-600 capitalize">{profile.role}</p>
             </div>
             <button
               onClick={handleSignOut}
@@ -104,7 +104,7 @@ export function Dashboard() {
             Seu dashboard está sendo preparado. Em breve você terá acesso a todas as funcionalidades.
           </p>
 
-          {profile.user_type === 'professional' && (
+          {profile.role === 'professional' && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="p-8 border-2 border-slate-200 rounded-2xl hover:border-brand-purple-500 transition-all cursor-pointer group">
                 <h3 className="font-semibold text-lg mb-2 group-hover:text-brand-purple-600">Meus Planos</h3>
@@ -121,7 +121,7 @@ export function Dashboard() {
             </div>
           )}
 
-          {profile.user_type === 'patient' && (
+          {profile.role === 'patient' && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="p-8 border-2 border-slate-200 rounded-2xl hover:border-brand-purple-500 transition-all cursor-pointer group">
                 <h3 className="font-semibold text-lg mb-2 group-hover:text-brand-purple-600">Minhas Assinaturas</h3>
@@ -138,7 +138,7 @@ export function Dashboard() {
             </div>
           )}
 
-          {profile.user_type === 'admin' && (
+          {profile.role === 'admin' && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="p-8 border-2 border-slate-200 rounded-2xl hover:border-brand-purple-500 transition-all cursor-pointer group">
                 <h3 className="font-semibold text-lg mb-2 group-hover:text-brand-purple-600">Gerenciar Profissionais</h3>

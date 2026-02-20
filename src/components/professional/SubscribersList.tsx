@@ -1,23 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Mail, Phone, Calendar } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { supabase } from '../../integrations/supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface Subscriber {
   id: string;
-  started_at: string;
-  expires_at: string;
+  user_id: string;
+  plan_id: string | null;
   status: string;
-  amount_paid: number;
-  billing_cycle: string;
-  profiles: {
-    full_name: string;
-    email: string;
-    phone: string | null;
-  };
-  benefit_plans: {
-    name: string;
-  };
+  started_at: string;
+  expires_at: string | null;
 }
 
 export function SubscribersList() {
@@ -26,44 +18,22 @@ export function SubscribersList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchSubscribers();
-  }, []);
+    if (user) {
+      fetchSubscribers();
+    }
+  }, [user]);
 
   const fetchSubscribers = async () => {
+    if (!user) return;
     setLoading(true);
     try {
-      const { data: professional } = await supabase
-        .from('professionals')
-        .select('id')
-        .eq('user_id', user?.id)
-        .single();
-
-      if (!professional) return;
-
-      const { data: plans } = await supabase
-        .from('benefit_plans')
-        .select('id')
-        .eq('professional_id', professional.id);
-
-      if (!plans || plans.length === 0) {
-        setLoading(false);
-        return;
-      }
-
-      const planIds = plans.map((p: { id: string }) => p.id);
-
       const { data, error } = await supabase
         .from('subscriptions')
-        .select(`
-          *,
-          profiles:patient_id(full_name, email, phone),
-          benefit_plans:plan_id(name)
-        `)
-        .in('plan_id', planIds)
+        .select('*')
         .order('started_at', { ascending: false });
 
       if (!error && data) {
-        setSubscribers(data as any);
+        setSubscribers(data);
       }
     } catch (error) {
       console.error(error);
@@ -73,21 +43,19 @@ export function SubscribersList() {
   };
 
   const getStatusBadge = (status: string) => {
-    const styles = {
+    const styles: Record<string, string> = {
       active: 'bg-green-100 text-green-800',
       cancelled: 'bg-red-100 text-red-800',
       expired: 'bg-yellow-100 text-yellow-800',
-      suspended: 'bg-slate-100 text-slate-800',
     };
-    const labels = {
+    const labels: Record<string, string> = {
       active: 'Ativo',
       cancelled: 'Cancelado',
       expired: 'Expirado',
-      suspended: 'Suspenso',
     };
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof labels]}
+      <span className={`px-3 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-slate-100 text-slate-800'}`}>
+        {labels[status] || status}
       </span>
     );
   };
@@ -121,39 +89,22 @@ export function SubscribersList() {
           <div key={sub.id} className="p-6 hover:bg-slate-50 transition-colors">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="text-lg font-semibold text-slate-800">{sub.profiles?.full_name}</h3>
-                <p className="text-sm text-slate-600 mt-1">Plano: {sub.benefit_plans?.name}</p>
+                <p className="text-sm text-slate-600 mt-1">ID: {sub.user_id}</p>
               </div>
               {getStatusBadge(sub.status)}
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex items-center gap-2 text-slate-600">
-                <Mail className="w-4 h-4" />
-                {sub.profiles?.email}
-              </div>
-              {sub.profiles?.phone && (
-                <div className="flex items-center gap-2 text-slate-600">
-                  <Phone className="w-4 h-4" />
-                  {sub.profiles.phone}
-                </div>
-              )}
-              <div className="flex items-center gap-2 text-slate-600">
                 <Calendar className="w-4 h-4" />
                 Início: {new Date(sub.started_at).toLocaleDateString('pt-BR')}
               </div>
-              <div className="flex items-center gap-2 text-slate-600">
-                <Calendar className="w-4 h-4" />
-                Expira: {new Date(sub.expires_at).toLocaleDateString('pt-BR')}
-              </div>
-            </div>
-
-            <div className="mt-4 flex items-center justify-between">
-              <div>
-                <span className="text-sm text-slate-600">Valor pago: </span>
-                <span className="font-semibold text-brand-purple-600">R$ {sub.amount_paid.toFixed(2)}</span>
-                <span className="text-xs text-slate-500 ml-2">({sub.billing_cycle === 'monthly' ? 'Mensal' : 'Anual'})</span>
-              </div>
+              {sub.expires_at && (
+                <div className="flex items-center gap-2 text-slate-600">
+                  <Calendar className="w-4 h-4" />
+                  Expira: {new Date(sub.expires_at).toLocaleDateString('pt-BR')}
+                </div>
+              )}
             </div>
           </div>
         ))}

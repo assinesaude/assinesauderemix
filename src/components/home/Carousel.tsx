@@ -4,9 +4,10 @@ import { supabase } from '../../integrations/supabase/client';
 
 interface CarouselItem {
   id: string;
-  media_type: string;
-  media_url: string;
-  caption: string | null;
+  image_url: string;
+  title: string | null;
+  subtitle: string | null;
+  link_url: string | null;
   order_position: number;
 }
 
@@ -81,29 +82,26 @@ export function Carousel() {
   return (
     <div className="relative w-full h-[600px] overflow-hidden group">
       <div className="absolute inset-0">
-        {currentItem.media_type === 'video' ? (
-          <video
-            src={currentItem.media_url}
-            autoPlay
-            muted
-            loop
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <img
-            src={currentItem.media_url}
-            alt={currentItem.caption || 'Carousel image'}
-            className="w-full h-full object-cover"
-          />
-        )}
+        <img
+          src={currentItem.image_url}
+          alt={currentItem.title || 'Carousel image'}
+          className="w-full h-full object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
       </div>
 
-      {currentItem.caption && (
+      {(currentItem.title || currentItem.subtitle) && (
         <div className="absolute bottom-0 left-0 right-0 p-16">
-          <p className="text-white text-3xl font-light text-center max-w-5xl mx-auto leading-relaxed">
-            {currentItem.caption}
-          </p>
+          {currentItem.title && (
+            <h3 className="text-white text-3xl font-light text-center max-w-5xl mx-auto leading-relaxed">
+              {currentItem.title}
+            </h3>
+          )}
+          {currentItem.subtitle && (
+            <p className="text-white/80 text-lg text-center max-w-5xl mx-auto mt-2">
+              {currentItem.subtitle}
+            </p>
+          )}
         </div>
       )}
 

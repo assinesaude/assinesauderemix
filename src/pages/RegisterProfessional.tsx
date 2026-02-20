@@ -74,16 +74,11 @@ export function RegisterProfessional() {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error('Erro ao criar usuário');
 
-      const { error: profError } = await supabase.from('professionals').insert({
+      const { error: profError } = await supabase.from('professionals').insert([{
         user_id: userData.user.id,
-        professional_type: formData.professionalType,
-        council_number: formData.councilNumber,
-        council_state: formData.councilState,
-        business_type: formData.businessType,
-        payment_preference: formData.paymentPreference,
-        pix_key: formData.pixKey || null,
-        subscription_status: 'pending'
-      });
+        name: formData.fullName,
+        specialty: formData.professionalType || null,
+      }]);
 
       if (profError) throw profError;
 

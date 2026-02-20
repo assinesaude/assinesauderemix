@@ -7,18 +7,9 @@ interface Message {
   id: string;
   sender_id: string;
   recipient_id: string;
-  subject: string | null;
   content: string;
-  read: boolean;
+  is_read: boolean;
   created_at: string;
-  sender?: {
-    full_name: string;
-    user_type: string;
-  };
-  recipient?: {
-    full_name: string;
-    user_type: string;
-  };
 }
 
 export function MessagingModule() {
@@ -28,8 +19,7 @@ export function MessagingModule() {
   const [loading, setLoading] = useState(true);
   const [showCompose, setShowCompose] = useState(false);
   const [newMessage, setNewMessage] = useState({
-    recipient_email: '',
-    subject: '',
+    recipient_name: '',
     content: ''
   });
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
@@ -46,22 +36,12 @@ export function MessagingModule() {
     try {
       let query = supabase
         .from('messages')
-        .select(`
-          *,
-          sender:sender_id (
-            full_name,
-            user_type
-          ),
-          recipient:recipient_id (
-            full_name,
-            user_type
-          )
-        `)
+        .select('*')
         .or(`sender_id.eq.${profile.id},recipient_id.eq.${profile.id}`)
         .order('created_at', { ascending: false });
 
       if (filter === 'unread') {
-        query = query.eq('read', false).eq('recipient_id', profile.id);
+        query = query.eq('is_read', false).eq('recipient_id', profile.id);
       }
 
       const { data, error } = await query;
@@ -85,11 +65,11 @@ export function MessagingModule() {
       const { data: recipient, error: recipientError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('full_name', newMessage.recipient_email)
+        .eq('full_name', newMessage.recipient_name)
         .maybeSingle();
 
       if (recipientError || !recipient) {
-        alert('Destinatário não encontrado. Tente usar o email cadastrado.');
+        alert('Destinatário não encontrado.');
         return;
       }
 
@@ -98,14 +78,12 @@ export function MessagingModule() {
         .insert([{
           sender_id: profile.id,
           recipient_id: recipient.id,
-          subject: newMessage.subject || 'Sem assunto',
           content: newMessage.content,
-          read: false
         }]);
 
       if (error) throw error;
 
-      setNewMessage({ recipient_email: '', subject: '', content: '' });
+      setNewMessage({ recipient_name: '', content: '' });
       setShowCompose(false);
       fetchMessages();
     } catch (error) {
@@ -120,7 +98,7 @@ export function MessagingModule() {
     try {
       const { error } = await supabase
         .from('messages')
-        .update({ read: true })
+        .update({ is_read: true })
         .eq('id', messageId)
         .eq('recipient_id', profile.id);
 
@@ -151,7 +129,7 @@ export function MessagingModule() {
 
   const handleSelectMessage = (message: Message) => {
     setSelectedMessage(message);
-    if (message.recipient_id === profile?.id && !message.read) {
+    if (message.recipient_id === profile?.id && !message.is_read) {
       handleMarkAsRead(message.id);
     }
   };
@@ -197,35 +175,18 @@ export function MessagingModule() {
           <h3 className="text-lg font-semibold text-slate-800 mb-4">Compor Mensagem</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Destinatário (Nome ou Email)
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Destinatário (Nome)</label>
               <input
                 type="text"
-                value={newMessage.recipient_email}
-                onChange={(e) => setNewMessage({ ...newMessage, recipient_email: e.target.value })}
+                value={newMessage.recipient_name}
+                onChange={(e) => setNewMessage({ ...newMessage, recipient_name: e.target.value })}
                 placeholder="Nome do destinatário"
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-purple-600 focus:border-transparent"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Assunto
-              </label>
-              <input
-                type="text"
-                value={newMessage.subject}
-                onChange={(e) => setNewMessage({ ...newMessage, subject: e.target.value })}
-                placeholder="Assunto da mensagem"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-purple-600 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Mensagem
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Mensagem</label>
               <textarea
                 value={newMessage.content}
                 onChange={(e) => setNewMessage({ ...newMessage, content: e.target.value })}
@@ -264,13 +225,10 @@ export function MessagingModule() {
           </div>
           <div className="divide-y divide-slate-200 max-h-[600px] overflow-y-auto">
             {messages.length === 0 ? (
-              <div className="p-6 text-center text-slate-500">
-                Nenhuma mensagem encontrada
-              </div>
+              <div className="p-6 text-center text-slate-500">Nenhuma mensagem encontrada</div>
             ) : (
               messages.map((message) => {
                 const isReceived = message.recipient_id === profile?.id;
-                const otherPerson = isReceived ? message.sender : message.recipient;
 
                 return (
                   <div
@@ -278,25 +236,17 @@ export function MessagingModule() {
                     onClick={() => handleSelectMessage(message)}
                     className={`p-4 cursor-pointer hover:bg-slate-50 transition-colors ${
                       selectedMessage?.id === message.id ? 'bg-brand-purple-50' : ''
-                    } ${isReceived && !message.read ? 'bg-blue-50' : ''}`}
+                    } ${isReceived && !message.is_read ? 'bg-blue-50' : ''}`}
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <p className={`font-medium text-slate-800 ${isReceived && !message.read ? 'font-bold' : ''}`}>
-                        {isReceived ? 'De: ' : 'Para: '}
-                        {otherPerson?.full_name || 'Usuário'}
+                      <p className={`font-medium text-slate-800 ${isReceived && !message.is_read ? 'font-bold' : ''}`}>
+                        {isReceived ? 'Recebida' : 'Enviada'}
                       </p>
-                      {isReceived && !message.read && (
-                        <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">
-                          Nova
-                        </span>
+                      {isReceived && !message.is_read && (
+                        <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">Nova</span>
                       )}
                     </div>
-                    <p className="text-sm font-medium text-slate-700 mb-1">
-                      {message.subject || 'Sem assunto'}
-                    </p>
-                    <p className="text-xs text-slate-500 truncate">
-                      {message.content}
-                    </p>
+                    <p className="text-xs text-slate-500 truncate">{message.content}</p>
                     <p className="text-xs text-slate-400 mt-2">
                       {new Date(message.created_at).toLocaleString('pt-BR')}
                     </p>
@@ -313,16 +263,8 @@ export function MessagingModule() {
               <div className="p-6 border-b border-slate-200">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-slate-800 mb-2">
-                      {selectedMessage.subject || 'Sem assunto'}
-                    </h3>
                     <p className="text-sm text-slate-600">
-                      {selectedMessage.recipient_id === profile?.id ? 'De: ' : 'Para: '}
-                      <span className="font-medium">
-                        {selectedMessage.recipient_id === profile?.id
-                          ? selectedMessage.sender?.full_name
-                          : selectedMessage.recipient?.full_name}
-                      </span>
+                      {selectedMessage.recipient_id === profile?.id ? 'Mensagem recebida' : 'Mensagem enviada'}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
                       {new Date(selectedMessage.created_at).toLocaleString('pt-BR')}

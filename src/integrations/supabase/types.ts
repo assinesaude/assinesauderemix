@@ -44,6 +44,39 @@ export type Database = {
         }
         Relationships: []
       }
+      benefit_plans: {
+        Row: {
+          created_at: string
+          description: string | null
+          features: Json | null
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean
+          name: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brazilian_cities: {
         Row: {
           id: string
@@ -88,6 +121,86 @@ export type Database = {
         }
         Relationships: []
       }
+      carousel_items: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          is_active: boolean
+          link_url: string | null
+          order_position: number
+          subtitle: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          link_url?: string | null
+          order_position?: number
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          link_url?: string | null
+          order_position?: number
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contract_mirrors: {
+        Row: {
+          contract_content: string
+          contract_type: string
+          country_id: string
+          created_at: string
+          effective_date: string
+          id: string
+          is_active: boolean
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          contract_content: string
+          contract_type?: string
+          country_id: string
+          created_at?: string
+          effective_date?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          contract_content?: string
+          contract_type?: string
+          country_id?: string
+          created_at?: string
+          effective_date?: string
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_mirrors_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contract_templates: {
         Row: {
           content: string
@@ -124,6 +237,36 @@ export type Database = {
           type?: string
           updated_at?: string
           variables?: Json | null
+        }
+        Relationships: []
+      }
+      countries: {
+        Row: {
+          code: string
+          created_at: string
+          domain: string | null
+          id: string
+          language_code: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          domain?: string | null
+          id?: string
+          language_code?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          domain?: string | null
+          id?: string
+          language_code?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -259,6 +402,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_read: boolean
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: []
       }
       patient_profiles: {
         Row: {
@@ -650,6 +820,36 @@ export type Database = {
           },
         ]
       }
+      professionals: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          specialty: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          specialty?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          specialty?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       professions: {
         Row: {
           created_at: string
@@ -671,6 +871,33 @@ export type Database = {
           is_active?: boolean
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -760,6 +987,113 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          plan_id: string | null
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_id?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          plan_id?: string | null
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "benefit_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tervis_usage: {
+        Row: {
+          created_at: string
+          id: string
+          query: string
+          response: string | null
+          tokens_used: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          query: string
+          response?: string | null
+          tokens_used?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          query?: string
+          response?: string | null
+          tokens_used?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_approved: boolean
+          is_featured: boolean
+          photo_url: string | null
+          rating: number | null
+          updated_at: string
+          user_id: string
+          user_type: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          is_featured?: boolean
+          photo_url?: string | null
+          rating?: number | null
+          updated_at?: string
+          user_id: string
+          user_type?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          is_featured?: boolean
+          photo_url?: string | null
+          rating?: number | null
+          updated_at?: string
+          user_id?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -778,6 +1112,39 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      vector_icons: {
+        Row: {
+          caption: string
+          created_at: string
+          id: string
+          image_url: string
+          is_active: boolean
+          order_position: number
+          specialty: string | null
+          updated_at: string
+        }
+        Insert: {
+          caption: string
+          created_at?: string
+          id?: string
+          image_url: string
+          is_active?: boolean
+          order_position?: number
+          specialty?: string | null
+          updated_at?: string
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          order_position?: number
+          specialty?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
