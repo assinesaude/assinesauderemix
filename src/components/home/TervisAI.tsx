@@ -118,11 +118,10 @@ export function TervisAI() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-center gap-8 mb-8">
-          <img
-            src="/TERVISAIBONITO.png"
-            alt="TERVIS.AI"
-            className="h-24"
-          />
+          <div className="flex items-center gap-2">
+            <Search className="w-10 h-10 text-blue-600" />
+            <span className="text-2xl font-bold text-slate-800">TERVIS<span className="text-blue-600">.AI</span></span>
+          </div>
 
           <form onSubmit={handleSearch} className="flex-1 max-w-3xl">
             <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">

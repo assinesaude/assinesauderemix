@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ExternalLink, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ExternalLink, Clock, Newspaper } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface NewsArticle {
@@ -171,11 +171,7 @@ export function HealthNews() {
     <section className="py-12 bg-gradient-to-b from-white to-slate-50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center gap-4 mb-8">
-          <img
-            src="/healthnewstoday.png"
-            alt="HealthNews.Today"
-            className="h-10 w-auto"
-          />
+          <Newspaper className="w-8 h-8 text-brand-green-600" />
           <h2 className="text-2xl font-bold text-slate-800">
             {t('healthNewsTitle')}
           </h2>
