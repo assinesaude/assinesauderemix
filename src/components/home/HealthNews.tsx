@@ -106,8 +106,18 @@ export function HealthNews() {
 
   const fetchHealthNews = async () => {
     try {
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || `https://${projectId}.supabase.co`;
       const response = await fetch(`${supabaseUrl}/functions/v1/fetch-health-news?lang=${language}`);
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.includes('application/json')) {
+        console.warn('Health news returned non-JSON response, using fallback');
+        setArticles(getFallbackArticles());
+        setLoading(false);
+        return;
+      }
+      
       const data = await response.json();
 
       if (data.status === 'ok' && data.items && data.items.length > 0) {

@@ -117,40 +117,24 @@ export function Testimonials() {
     try {
       const { data: professionals } = await supabase
         .from('testimonials')
-        .select(`
-          id,
-          content,
-          photo_url,
-          city,
-          language_code,
-          profiles (full_name)
-        `)
+        .select('id, content, photo_url, rating')
         .eq('user_type', 'professional')
-        .eq('is_published', true)
-        .eq('language_code', language)
+        .eq('is_approved', true)
         .limit(20);
 
       const { data: patients } = await supabase
         .from('testimonials')
-        .select(`
-          id,
-          content,
-          photo_url,
-          city,
-          language_code,
-          profiles (full_name)
-        `)
+        .select('id, content, photo_url, rating')
         .eq('user_type', 'patient')
-        .eq('is_published', true)
-        .eq('language_code', language)
+        .eq('is_approved', true)
         .limit(30);
 
       if (professionals && professionals.length > 0) {
         const mappedProfessionals = professionals.map((t: any) => ({
           id: t.id,
           text: t.content,
-          author: t.profiles?.full_name || 'Profissional de Saúde',
-          location: t.city || 'Brasil',
+          author: 'Profissional de Saúde',
+          location: 'Brasil',
           image: t.photo_url || 'https://images.pexels.com/photos/5215024/pexels-photo-5215024.jpeg?auto=compress&cs=tinysrgb&w=300'
         }));
         setDbProfessionalTestimonials(mappedProfessionals);
@@ -160,8 +144,8 @@ export function Testimonials() {
         const mappedPatients = patients.map((t: any) => ({
           id: t.id,
           text: t.content,
-          author: t.profiles?.full_name || 'Paciente',
-          location: t.city || 'Brasil',
+          author: 'Paciente',
+          location: 'Brasil',
           image: t.photo_url || 'https://images.pexels.com/photos/1741205/pexels-photo-1741205.jpeg?auto=compress&cs=tinysrgb&w=300'
         }));
         setDbPatientTestimonials(mappedPatients);
