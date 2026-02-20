@@ -23,9 +23,9 @@ export function Login() {
 
   useEffect(() => {
     if (profile) {
-      if (profile.user_type === 'admin') {
+      if (profile.role === 'admin') {
         navigate('/admin/dashboard');
-      } else if (profile.user_type === 'professional') {
+      } else if (profile.role === 'professional') {
         navigate('/professional/dashboard');
       } else {
         navigate('/dashboard');

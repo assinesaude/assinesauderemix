@@ -2,15 +2,14 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from '../integrations/supabase/client';
 
-type UserType = 'admin' | 'professional' | 'patient';
+type UserRole = 'admin' | 'professional' | 'patient';
 
 interface Profile {
   id: string;
-  user_type: UserType;
-  full_name: string;
-  phone: string | null;
-  whatsapp: boolean;
+  user_id: string;
+  full_name: string | null;
   avatar_url: string | null;
+  role: UserRole;
 }
 
 interface AuthContextType {
@@ -19,7 +18,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string, userType: UserType) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, role?: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -33,14 +32,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
+    const { data: profileData } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', userId)
+      .eq('user_id', userId)
       .maybeSingle();
 
-    if (!error && data) {
-      setProfile(data);
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (profileData) {
+      setProfile({
+        ...profileData,
+        role: (roleData?.role as UserRole) || 'patient',
+      });
+    } else {
+      // Profile doesn't exist yet, create minimal one with role
+      if (roleData) {
+        setProfile({
+          id: '',
+          user_id: userId,
+          full_name: null,
+          avatar_url: null,
+          role: roleData.role as UserRole,
+        });
+      }
     }
   };
 
@@ -82,19 +101,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
-  const signUp = async (email: string, password: string, fullName: string, userType: UserType) => {
+  const signUp = async (email: string, password: string, fullName: string, role: UserRole = 'patient') => {
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
 
     if (data.user) {
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id: data.user.id,
+      await supabase.from('profiles').insert({
+        user_id: data.user.id,
         full_name: fullName,
-        user_type: userType,
-        whatsapp: false
       });
 
-      if (profileError) throw profileError;
+      await supabase.from('user_roles').insert({
+        user_id: data.user.id,
+        role,
+      });
     }
   };
 

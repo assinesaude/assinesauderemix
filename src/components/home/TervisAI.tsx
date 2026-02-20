@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Mic, MicOff, Search, AlertCircle, Lock, Pill } from 'lucide-react';
 import { supabase } from '../../integrations/supabase/client';
 import { useAuth } from '../../contexts/AuthContext';
@@ -23,59 +23,17 @@ export function TervisAI() {
   const [aiResponse, setAiResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [textSearchCount, setTextSearchCount] = useState(0);
-  const [voiceSearchCount, setVoiceSearchCount] = useState(0);
-  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random()}`);
   const [showBulario, setShowBulario] = useState(false);
 
-  useEffect(() => {
-    checkUsage();
-  }, []);
-
-  const checkUsage = async () => {
-    const today = new Date().toISOString().split('T')[0];
-
-    if (user) {
-      const { data } = await supabase
-        .from('tervis_usage')
-        .select('search_type')
-        .eq('user_id', user.id)
-        .eq('date', today);
-
-      if (data) {
-        setTextSearchCount(data.filter((d: { search_type: string }) => d.search_type === 'text').length);
-        setVoiceSearchCount(data.filter((d: { search_type: string }) => d.search_type === 'voice').length);
-      }
-    } else {
-      const { data } = await supabase
-        .from('tervis_usage')
-        .select('search_type')
-        .eq('session_id', sessionId)
-        .eq('date', today);
-
-      if (data) {
-        setTextSearchCount(data.filter((d: { search_type: string }) => d.search_type === 'text').length);
-        setVoiceSearchCount(data.filter((d: { search_type: string }) => d.search_type === 'voice').length);
-      }
-    }
-  };
-
-  const trackUsage = async (searchType: 'text' | 'voice') => {
+  const trackUsage = async (searchQuery: string) => {
+    if (!user) return;
     await supabase.from('tervis_usage').insert({
-      user_id: user?.id || null,
-      session_id: sessionId,
-      search_type: searchType,
-      query: query,
-      date: new Date().toISOString().split('T')[0]
+      user_id: user.id,
+      query: searchQuery,
     });
   };
 
   const handleVoiceSearch = () => {
-    if (voiceSearchCount >= 10) {
-      setError('Você atingiu o limite diário de 10 buscas por voz.');
-      return;
-    }
-
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       setError('Seu navegador não suporta reconhecimento de voz.');
       return;
@@ -119,35 +77,17 @@ export function TervisAI() {
       return;
     }
 
-    const searchType = isListening ? 'voice' : 'text';
-
-    if (searchType === 'text' && textSearchCount >= 20) {
-      setError('Você atingiu o limite diário de 20 buscas por texto.');
-      return;
-    }
-
-    if (searchType === 'voice' && voiceSearchCount >= 10) {
-      setError('Você atingiu o limite diário de 10 buscas por voz.');
-      return;
-    }
-
     setLoading(true);
     setError('');
     setResults([]);
     setAiResponse('');
 
     try {
-      await trackUsage(searchType);
-
-      if (searchType === 'text') {
-        setTextSearchCount(prev => prev + 1);
-      } else {
-        setVoiceSearchCount(prev => prev + 1);
-      }
+      await trackUsage(query);
 
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/tervis-ai-search`;
       const headers = {
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         'Content-Type': 'application/json',
       };
 
@@ -205,7 +145,7 @@ export function TervisAI() {
                 <button
                   type="button"
                   onClick={handleVoiceSearch}
-                  disabled={loading || isListening || voiceSearchCount >= 10}
+                  disabled={loading || isListening}
                   className={`px-4 py-3 rounded-lg transition-colors ${
                     isListening
                       ? 'bg-red-500 hover:bg-red-600 text-white'
@@ -218,7 +158,7 @@ export function TervisAI() {
 
                 <button
                   type="submit"
-                  disabled={loading || !query.trim() || textSearchCount >= 20}
+                  disabled={loading || !query.trim()}
                   className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   title="Busca por texto"
                 >

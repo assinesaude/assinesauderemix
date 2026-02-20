@@ -8,13 +8,10 @@ interface Testimonial {
   user_type: string;
   content: string;
   photo_url: string | null;
-  city: string | null;
-  language_code: string;
-  is_published: boolean;
+  rating: number | null;
+  is_approved: boolean;
+  is_featured: boolean;
   created_at: string;
-  profiles?: {
-    full_name: string;
-  };
 }
 
 interface Country {
@@ -29,39 +26,27 @@ interface Props {
   selectedCountry: Country | null;
 }
 
-export function TestimonialsManager({ selectedCountry }: Props) {
+export function TestimonialsManager({ selectedCountry: _selectedCountry }: Props) {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTestimonial, setNewTestimonial] = useState({
-    full_name: '',
-    user_type: 'professional',
     content: '',
     photo_url: '',
-    city: ''
+    user_type: 'professional',
   });
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    if (selectedCountry) {
-      fetchTestimonials();
-    }
-  }, [selectedCountry]);
+    fetchTestimonials();
+  }, []);
 
   const fetchTestimonials = async () => {
-    if (!selectedCountry) return;
-
     try {
       const { data, error } = await supabase
         .from('testimonials')
-        .select(`
-          *,
-          profiles (
-            full_name
-          )
-        `)
-        .eq('language_code', selectedCountry.language_code)
-        .order('created_at', { ascending: false});
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setTestimonials(data || []);
@@ -102,8 +87,8 @@ export function TestimonialsManager({ selectedCountry }: Props) {
   };
 
   const handleAddTestimonial = async () => {
-    if (!newTestimonial.full_name || !newTestimonial.content) {
-      alert('Por favor, preencha o nome e o depoimento');
+    if (!newTestimonial.content) {
+      alert('Por favor, preencha o depoimento');
       return;
     }
 
@@ -111,51 +96,19 @@ export function TestimonialsManager({ selectedCountry }: Props) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('full_name', newTestimonial.full_name)
-        .maybeSingle();
-
-      let userId = user.id;
-
-      if (!profile) {
-        const { data: newProfile, error: createProfileError } = await supabase
-          .from('profiles')
-          .insert([{
-            id: user.id,
-            full_name: newTestimonial.full_name,
-            user_type: newTestimonial.user_type as 'admin' | 'professional' | 'patient'
-          }])
-          .select()
-          .single();
-
-        if (createProfileError) throw createProfileError;
-        userId = newProfile.id;
-      } else {
-        userId = profile.id;
-      }
-
       const { error } = await supabase
         .from('testimonials')
         .insert([{
-          user_id: userId,
+          user_id: user.id,
           user_type: newTestimonial.user_type,
           content: newTestimonial.content,
           photo_url: newTestimonial.photo_url || null,
-          city: newTestimonial.city || null,
-          is_published: true
+          is_approved: true,
         }]);
 
       if (error) throw error;
 
-      setNewTestimonial({
-        full_name: '',
-        user_type: 'professional',
-        content: '',
-        photo_url: '',
-        city: ''
-      });
+      setNewTestimonial({ content: '', photo_url: '', user_type: 'professional' });
       setShowAddForm(false);
       fetchTestimonials();
     } catch (error) {
@@ -181,11 +134,11 @@ export function TestimonialsManager({ selectedCountry }: Props) {
     }
   };
 
-  const handleTogglePublished = async (id: string, currentStatus: boolean) => {
+  const handleToggleApproved = async (id: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
         .from('testimonials')
-        .update({ is_published: !currentStatus })
+        .update({ is_approved: !currentStatus })
         .eq('id', id);
 
       if (error) throw error;
@@ -222,22 +175,7 @@ export function TestimonialsManager({ selectedCountry }: Props) {
           <h3 className="text-lg font-semibold text-slate-800 mb-4">Novo Depoimento</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Nome Completo *
-              </label>
-              <input
-                type="text"
-                value={newTestimonial.full_name}
-                onChange={(e) => setNewTestimonial({ ...newTestimonial, full_name: e.target.value })}
-                placeholder="Ex: Dr. João Silva"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-purple-600 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Tipo de Usuário *
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Tipo de Usuário *</label>
               <select
                 value={newTestimonial.user_type}
                 onChange={(e) => setNewTestimonial({ ...newTestimonial, user_type: e.target.value })}
@@ -249,9 +187,7 @@ export function TestimonialsManager({ selectedCountry }: Props) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Depoimento *
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Depoimento *</label>
               <textarea
                 value={newTestimonial.content}
                 onChange={(e) => setNewTestimonial({ ...newTestimonial, content: e.target.value })}
@@ -262,45 +198,17 @@ export function TestimonialsManager({ selectedCountry }: Props) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Cidade
-              </label>
-              <input
-                type="text"
-                value={newTestimonial.city}
-                onChange={(e) => setNewTestimonial({ ...newTestimonial, city: e.target.value })}
-                placeholder="Ex: São Paulo, Brasil"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-purple-600 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Foto (URL ou Upload)
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Foto</label>
               <div className="flex items-center gap-4">
                 <label className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg cursor-pointer transition-colors">
                   <Upload className="w-5 h-5" />
                   {uploading ? 'Enviando...' : 'Upload Foto'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    disabled={uploading}
-                  />
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploading} />
                 </label>
                 {newTestimonial.photo_url && (
                   <img src={newTestimonial.photo_url} alt="Preview" className="w-16 h-16 rounded-full object-cover" />
                 )}
               </div>
-              <input
-                type="text"
-                value={newTestimonial.photo_url}
-                onChange={(e) => setNewTestimonial({ ...newTestimonial, photo_url: e.target.value })}
-                placeholder="Ou cole a URL da foto aqui"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-brand-purple-600 focus:border-transparent mt-2"
-              />
             </div>
 
             <button
@@ -319,36 +227,31 @@ export function TestimonialsManager({ selectedCountry }: Props) {
           <div
             key={testimonial.id}
             className={`bg-white rounded-xl shadow-lg p-6 border ${
-              testimonial.is_published ? 'border-green-200' : 'border-slate-200'
+              testimonial.is_approved ? 'border-green-200' : 'border-slate-200'
             }`}
           >
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-3">
                 {testimonial.photo_url && (
-                  <img
-                    src={testimonial.photo_url}
-                    alt={testimonial.profiles?.full_name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
+                  <img src={testimonial.photo_url} alt="Foto" className="w-12 h-12 rounded-full object-cover" />
                 )}
                 <div>
-                  <h3 className="font-semibold text-slate-800">
-                    {testimonial.profiles?.full_name || 'Usuário'}
-                  </h3>
-                  <p className="text-sm text-slate-500">{testimonial.city}</p>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    testimonial.user_type === 'professional' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                  }`}>
+                    {testimonial.user_type === 'professional' ? 'Profissional' : 'Paciente'}
+                  </span>
                 </div>
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => handleTogglePublished(testimonial.id, testimonial.is_published)}
+                  onClick={() => handleToggleApproved(testimonial.id, testimonial.is_approved)}
                   className={`p-2 rounded-lg transition-colors ${
-                    testimonial.is_published
-                      ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    testimonial.is_approved ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
-                  title={testimonial.is_published ? 'Publicado' : 'Não publicado'}
+                  title={testimonial.is_approved ? 'Aprovado' : 'Não aprovado'}
                 >
-                  {testimonial.is_published ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                  {testimonial.is_approved ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                 </button>
                 <button
                   onClick={() => handleDeleteTestimonial(testimonial.id)}
@@ -360,20 +263,9 @@ export function TestimonialsManager({ selectedCountry }: Props) {
             </div>
 
             <p className="text-slate-700 mb-3 line-clamp-4">{testimonial.content}</p>
-
-            <div className="flex items-center gap-2 text-sm">
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                testimonial.user_type === 'professional'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-green-100 text-green-700'
-              }`}>
-                {testimonial.user_type === 'professional' ? 'Profissional' : 'Paciente'}
-              </span>
-              <span className="text-slate-400">•</span>
-              <span className="text-slate-500">
-                {new Date(testimonial.created_at).toLocaleDateString('pt-BR')}
-              </span>
-            </div>
+            <span className="text-xs text-slate-500">
+              {new Date(testimonial.created_at).toLocaleDateString('pt-BR')}
+            </span>
           </div>
         ))}
       </div>

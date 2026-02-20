@@ -82,9 +82,9 @@ export function Header() {
                 <div className="flex items-center gap-3">
                   <Link
                     to={
-                      profile.user_type === 'admin'
+                      profile.role === 'admin'
                         ? '/admin/dashboard'
-                        : profile.user_type === 'professional'
+                        : profile.role === 'professional'
                         ? '/professional/dashboard'
                         : '/dashboard'
                     }
